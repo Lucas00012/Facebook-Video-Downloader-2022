@@ -24,10 +24,10 @@ namespace FacebookVideosDownloader.Helpers
         }
 
         public string Url { get; private set; }
-        public EventHandler<Network.RequestInterceptedEventArgs> Interceptor { get; private set; }
-        public Network.InterceptionStage InterceptionStage { get; private set; }
-        public Network.ResourceType ResourceType { get; private set; }
-        public ChromeDriver ChromeDriver { get; private set; }
+        private EventHandler<Network.RequestInterceptedEventArgs> Interceptor { get; set; }
+        private Network.InterceptionStage InterceptionStage { get; set; }
+        private Network.ResourceType ResourceType { get; set; }
+        private ChromeDriver ChromeDriver { get; set; }
 
         public async Task Intercept()
         {
@@ -53,6 +53,11 @@ namespace FacebookVideosDownloader.Helpers
             driver.Url = Url;
 
             ChromeDriver = driver;
+        }
+
+        public void Finish()
+        {
+            ChromeDriver.Close();
         }
     }
 }

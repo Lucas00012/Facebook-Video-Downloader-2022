@@ -66,7 +66,7 @@ namespace FacebookVideosDownloader
             {
                 if (videoDownloadUrls.Count == 2)
                 {
-                    chromeNetworkInterceptor.ChromeDriver.Close();
+                    chromeNetworkInterceptor.Finish();
                     return (videoDownloadUrls.ElementAt(0), videoDownloadUrls.ElementAt(1));
                 }
             }
