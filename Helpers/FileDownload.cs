@@ -27,6 +27,8 @@ namespace FacebookVideosDownloader.Helpers
 
             File.Delete(Path.Combine(outputDirectory, firstVideoPartFileName));
             File.Delete(Path.Combine(outputDirectory, secondVideoPartFileName));
+
+            exeProcess.Close();
         }
 
         public static string DownloadFile(string url, string outputDirectory)

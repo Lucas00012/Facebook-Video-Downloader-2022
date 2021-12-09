@@ -15,15 +15,29 @@ namespace FacebookVideosDownloader
     {
         static async Task Main(string[] args)
         {
-            
-            var facebookPostUrl = "https://www.facebook.com/100003559807264/videos/329669988989859/";
-            var (firstVideoPartUrl, secondVideoPartUrl) = await ObtainVideoUrls(facebookPostUrl);
-            var outputDirectory = @"D:\Temp";
+            Console.WriteLine("FACEBOOK VIDEO DOWNLOADER BY: Lucas00012");
+            Console.Write("Please insert the video url that you want: ");
+            var facebookPostUrl = Console.ReadLine();
 
-            var firstVideoPartFileName = FileDownload.DownloadFile(firstVideoPartUrl, outputDirectory);
-            var secondVideoPartFileName = FileDownload.DownloadFile(secondVideoPartUrl, outputDirectory);
+            Console.Write("Please insert the output directory that you want: ");
+            var outputDirectory = Console.ReadLine();
 
-            FileDownload.MergeAudioAndVideo(firstVideoPartFileName, secondVideoPartFileName, outputDirectory);
+            try
+            {
+                var (firstVideoPartUrl, secondVideoPartUrl) = await ObtainVideoUrls(facebookPostUrl);
+
+                var firstVideoPartFileName = FileDownload.DownloadFile(firstVideoPartUrl, outputDirectory);
+                var secondVideoPartFileName = FileDownload.DownloadFile(secondVideoPartUrl, outputDirectory);
+
+                FileDownload.MergeAudioAndVideo(firstVideoPartFileName, secondVideoPartFileName, outputDirectory);
+
+                Console.Clear();
+                Console.WriteLine("DOWNLOAD COMPLETED!");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         private static async Task<(string firstVideoPartUrl, string secondVideoPartUrl)> ObtainVideoUrls(string facebookPostUrl)
