@@ -31,8 +31,10 @@ namespace FacebookVideosDownloader.Helpers
 
         public async Task Intercept()
         {
-            var service = ChromeDriverService.CreateDefaultService();
             var options = new ChromeOptions();
+            options.AddArgument("headless");
+
+            var service = ChromeDriverService.CreateDefaultService();
             var driver = new ChromeDriver(service, options);
 
             var session = driver.GetDevToolsSession();
