@@ -1,13 +1,11 @@
-﻿using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.DevTools;
-using RestSharp;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Network = OpenQA.Selenium.DevTools.V96.Network;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using FacebookVideosDownloader.Helpers;
+using FacebookVideosDownloader.Core.Helpers;
+using FacebookVideosDownloader.Core.Entities;
 
 namespace FacebookVideosDownloader
 {
@@ -16,6 +14,7 @@ namespace FacebookVideosDownloader
         static async Task Main(string[] args)
         {
             Console.WriteLine("FACEBOOK VIDEO DOWNLOADER BY: Lucas00012");
+
             Console.Write("Please insert the video url that you want: ");
             var facebookPostUrl = Console.ReadLine();
 
@@ -49,14 +48,10 @@ namespace FacebookVideosDownloader
                 var url = Regex.Replace(e.Request.Url, @"bytestart=(\d+)&?|byteend=(\d+)&?", string.Empty);
 
                 if (videoDownloadUrls.Count == 2)
-                {
                     return;
-                }
 
                 if (url.StartsWith("https://video") && !videoDownloadUrls.Contains(url))
-                {
                     videoDownloadUrls.Add(url);
-                }
             };
 
             var chromeNetworkInterceptor = new ChromeNetworkInterceptor(facebookPostUrl, interceptor, Network.InterceptionStage.HeadersReceived, Network.ResourceType.XHR);

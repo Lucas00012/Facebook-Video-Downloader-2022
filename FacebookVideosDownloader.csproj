@@ -18,4 +18,13 @@
     <PackageReference Include="WebDriverManager" Version="2.12.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Webdrivers\chromedriver.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Webdrivers\geckodriver.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
