@@ -19,7 +19,7 @@ namespace FacebookVideosDownloader.Core.Entities
         public Network.InterceptionStage InterceptionStage { get; set; }
         public Network.ResourceType ResourceType { get; set; }
 
-        private ChromeDriver ChromeDriver { get; set; }
+        public ChromeDriver ChromeDriver { get; private set; }
 
         public async Task Intercept(EventHandler<Network.RequestInterceptedEventArgs> interceptor)
         {
@@ -32,7 +32,8 @@ namespace FacebookVideosDownloader.Core.Entities
             await domains.Network.SetRequestInterception(requestInterceptionCommandSettings);
             domains.Network.RequestIntercepted += interceptor;
 
-            ChromeDriver.Navigate().GoToUrl(Url);
+            if (ChromeDriver.Url != Url)
+                ChromeDriver.Navigate().GoToUrl(Url);
         }
 
         public void Finish()
