@@ -12,7 +12,7 @@ namespace FacebookVideosDownloader.Core.Entities
     {
         public ChromeNetworkInterceptor()
         {
-            ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome, false);
+            ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome);
         }
 
         public string Url { get; set; }
