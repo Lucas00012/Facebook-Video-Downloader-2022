@@ -38,6 +38,7 @@ namespace FacebookVideosDownloader.Core.Entities
         public void Finish()
         {
             ChromeDriver.Close();
+            ChromeDriver.Quit();
         }
 
         private Network.SetRequestInterceptionCommandSettings GetRequestInterceptionSettings()
