@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FacebookVideosDownloader.Core.Enums
+﻿namespace FacebookVideosDownloader.Core.Enums
 {
     public enum Browser
     {

@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Network = OpenQA.Selenium.DevTools.V96.Network;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using FacebookVideosDownloader.Core.Helpers;
 using FacebookVideosDownloader.Core.Entities;
 
 namespace FacebookVideosDownloader
@@ -23,12 +18,8 @@ namespace FacebookVideosDownloader
 
             try
             {
-                var (firstVideoPartUrl, secondVideoPartUrl) = await ObtainVideoUrls(facebookPostUrl);
-
-                var firstVideoPartFileName = FileDownload.DownloadFile(firstVideoPartUrl, outputDirectory);
-                var secondVideoPartFileName = FileDownload.DownloadFile(secondVideoPartUrl, outputDirectory);
-
-                FileDownload.MergeAudioAndVideo(firstVideoPartFileName, secondVideoPartFileName, outputDirectory);
+                var facebookVideoDownloader = new FacebookVideoDownloader();
+                await facebookVideoDownloader.Download(facebookPostUrl, outputDirectory);
 
                 Console.Clear();
                 Console.WriteLine("DOWNLOAD COMPLETED!");
@@ -36,34 +27,6 @@ namespace FacebookVideosDownloader
             catch(Exception e)
             {
                 Console.WriteLine(e.Message);
-            }
-        }
-
-        private static async Task<(string firstVideoPartUrl, string secondVideoPartUrl)> ObtainVideoUrls(string facebookPostUrl)
-        {
-            var videoDownloadUrls = new List<string>();
-
-            EventHandler<Network.RequestInterceptedEventArgs> interceptor = (sender, e) =>
-            {
-                var url = Regex.Replace(e.Request.Url, @"bytestart=(\d+)&?|byteend=(\d+)&?", string.Empty);
-
-                if (videoDownloadUrls.Count == 2)
-                    return;
-
-                if (url.StartsWith("https://video") && !videoDownloadUrls.Contains(url))
-                    videoDownloadUrls.Add(url);
-            };
-
-            var chromeNetworkInterceptor = new ChromeNetworkInterceptor(facebookPostUrl, interceptor, Network.InterceptionStage.HeadersReceived, Network.ResourceType.XHR);
-            await chromeNetworkInterceptor.Intercept();
-
-            while (true)
-            {
-                if (videoDownloadUrls.Count == 2)
-                {
-                    chromeNetworkInterceptor.Finish();
-                    return (videoDownloadUrls.ElementAt(0), videoDownloadUrls.ElementAt(1));
-                }
             }
         }
     }

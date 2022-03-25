@@ -1,11 +1,7 @@
 ﻿using FacebookVideosDownloader.Core.Enums;
 using FacebookVideosDownloader.Core.Helpers;
-using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DevToolsSessionDomains = OpenQA.Selenium.DevTools.V96.DevToolsSessionDomains;
 using Network = OpenQA.Selenium.DevTools.V96.Network;
@@ -14,42 +10,34 @@ namespace FacebookVideosDownloader.Core.Entities
 {
     public class ChromeNetworkInterceptor
     {
-        public ChromeNetworkInterceptor(
-            string url,
-            EventHandler<Network.RequestInterceptedEventArgs> interceptor,
-            Network.InterceptionStage interceptionStage,
-            Network.ResourceType resourceType)
+        public ChromeNetworkInterceptor()
         {
-            Url = url;
-
-            Interceptor = interceptor;
-            ResourceType = resourceType;
-            InterceptionStage = interceptionStage;
-
-            ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome);
+            ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome, false);
         }
 
-        public string Url { get; private set; }
-
-        private EventHandler<Network.RequestInterceptedEventArgs> Interceptor { get; set; }
-        private Network.InterceptionStage InterceptionStage { get; set; }
-        private Network.ResourceType ResourceType { get; set; }
+        public string Url { get; set; }
+        public Network.InterceptionStage InterceptionStage { get; set; }
+        public Network.ResourceType ResourceType { get; set; }
 
         private ChromeDriver ChromeDriver { get; set; }
 
-        public async Task Intercept()
+        public async Task Intercept(EventHandler<Network.RequestInterceptedEventArgs> interceptor)
         {
             var session = ChromeDriver.GetDevToolsSession();
             var domains = session.GetVersionSpecificDomains<DevToolsSessionDomains>();
 
-            await domains.Network.Enable(new Network.EnableCommandSettings());
-
             var requestInterceptionCommandSettings = GetRequestInterceptionSettings();
 
+            await domains.Network.Enable(new Network.EnableCommandSettings());
             await domains.Network.SetRequestInterception(requestInterceptionCommandSettings);
-            domains.Network.RequestIntercepted += Interceptor;
+            domains.Network.RequestIntercepted += interceptor;
 
             ChromeDriver.Navigate().GoToUrl(Url);
+        }
+
+        public void Finish()
+        {
+            ChromeDriver.Close();
         }
 
         private Network.SetRequestInterceptionCommandSettings GetRequestInterceptionSettings()
@@ -62,11 +50,6 @@ namespace FacebookVideosDownloader.Core.Entities
             setRequestInterceptionCommandSettings.Patterns = new Network.RequestPattern[] { requestPattern };
 
             return setRequestInterceptionCommandSettings;
-        }
-
-        public void Finish()
-        {
-            ChromeDriver.Close();
         }
     }
 }
