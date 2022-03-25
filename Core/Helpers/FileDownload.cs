@@ -9,22 +9,20 @@ namespace FacebookVideosDownloader.Core.Helpers
     {
         public static void MergeAudioAndVideo(string firstVideoPartFileName, string secondVideoPartFileName, string outputDirectory)
         {
-            var fileName = $"{Guid.NewGuid()}.mp4";
+            var fileName = $"video_{Guid.NewGuid()}.mp4";
 
-            string args = $"/c ffmpeg -i \"{firstVideoPartFileName}\" -i \"{secondVideoPartFileName}\" -shortest {fileName}";
-            ProcessStartInfo startInfo = new ProcessStartInfo();
+            var startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = false;
-            startInfo.FileName = "cmd.exe";
-            startInfo.WorkingDirectory = @"" + outputDirectory;
-            startInfo.Arguments = args;
+            startInfo.FileName = Path.Combine(Directory.GetCurrentDirectory(), "ffmpeg", "ffmpeg.exe");
+            startInfo.WorkingDirectory = $@"{outputDirectory}";
+            startInfo.Arguments = $"-i \"{firstVideoPartFileName}\" -i \"{secondVideoPartFileName}\" -shortest {fileName}";
 
-            using Process exeProcess = Process.Start(startInfo);
+            using var exeProcess = Process.Start(startInfo);
             exeProcess.WaitForExit();
+            exeProcess.Close();
 
             File.Delete(Path.Combine(outputDirectory, firstVideoPartFileName));
             File.Delete(Path.Combine(outputDirectory, secondVideoPartFileName));
-
-            exeProcess.Close();
         }
 
         public static string DownloadFile(string url, string outputDirectory)
@@ -32,7 +30,7 @@ namespace FacebookVideosDownloader.Core.Helpers
             var client = new RestClient();
             var request = new RestRequest(url, Method.GET);
 
-            var fileName = $"{Guid.NewGuid()}.mp4";
+            var fileName = $"video_part_{Guid.NewGuid()}.mp4";
             var bytes = client.DownloadData(request);
 
             File.WriteAllBytes(Path.Combine(outputDirectory, fileName), bytes);
