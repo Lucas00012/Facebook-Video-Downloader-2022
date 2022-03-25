@@ -8,7 +8,25 @@ namespace FacebookVideosDownloader
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("FACEBOOK VIDEO DOWNLOADER BY: Lucas00012");
+            Console.WriteLine(@"
+███████╗ █████╗  ██████╗███████╗██████╗  ██████╗  ██████╗ ██╗  ██╗    ██╗   ██╗██╗██████╗ ███████╗ ██████╗ 
+██╔════╝██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██╔═══██╗██║ ██╔╝    ██║   ██║██║██╔══██╗██╔════╝██╔═══██╗
+█████╗  ███████║██║     █████╗  ██████╔╝██║   ██║██║   ██║█████╔╝     ██║   ██║██║██║  ██║█████╗  ██║   ██║
+██╔══╝  ██╔══██║██║     ██╔══╝  ██╔══██╗██║   ██║██║   ██║██╔═██╗     ╚██╗ ██╔╝██║██║  ██║██╔══╝  ██║   ██║
+██║     ██║  ██║╚██████╗███████╗██████╔╝╚██████╔╝╚██████╔╝██║  ██╗     ╚████╔╝ ██║██████╔╝███████╗╚██████╔╝
+╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝╚═════╝  ╚═════╝  ╚═════╝ ╚═╝  ╚═╝      ╚═══╝  ╚═╝╚═════╝ ╚══════╝ ╚═════╝ 
+                                                                                                           
+██████╗  ██████╗ ██╗    ██╗███╗   ██╗██╗      ██████╗  █████╗ ██████╗ ███████╗██████╗                      
+██╔══██╗██╔═══██╗██║    ██║████╗  ██║██║     ██╔═══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗                     
+██║  ██║██║   ██║██║ █╗ ██║██╔██╗ ██║██║     ██║   ██║███████║██║  ██║█████╗  ██████╔╝                     
+██║  ██║██║   ██║██║███╗██║██║╚██╗██║██║     ██║   ██║██╔══██║██║  ██║██╔══╝  ██╔══██╗                     
+██████╔╝╚██████╔╝╚███╔███╔╝██║ ╚████║███████╗╚██████╔╝██║  ██║██████╔╝███████╗██║  ██║                     
+╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝                                                                                                                                                            ");
+
+            Console.WriteLine("Author: Lucas00012");
+            Console.WriteLine("Github: https://github.com/Lucas00012");
+            Console.WriteLine("Linkedin: https://www.linkedin.com/in/lucasormond");
+            Console.WriteLine();
 
             Console.Write("Please insert the video url that you want: ");
             var facebookPostUrl = Console.ReadLine();
@@ -18,6 +36,8 @@ namespace FacebookVideosDownloader
 
             try
             {
+                Console.Clear();
+
                 var facebookVideoDownloader = new FacebookVideoDownloader();
                 await facebookVideoDownloader.Download(facebookPostUrl, outputDirectory);
 
