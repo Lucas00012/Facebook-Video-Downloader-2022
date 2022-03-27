@@ -1,7 +1,11 @@
 ﻿using FacebookVideosDownloader.Core.Enums;
 using FacebookVideosDownloader.Core.Helpers;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DevToolsSessionDomains = OpenQA.Selenium.DevTools.V96.DevToolsSessionDomains;
 using Network = OpenQA.Selenium.DevTools.V96.Network;
@@ -13,16 +17,20 @@ namespace FacebookVideosDownloader.Core.Entities
         public ChromeNetworkInterceptor()
         {
             ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome);
+            Wait = new WebDriverWait(ChromeDriver, TimeSpan.FromSeconds(15));
         }
 
         public string Url { get; set; }
         public Network.InterceptionStage InterceptionStage { get; set; }
         public Network.ResourceType ResourceType { get; set; }
 
-        public ChromeDriver ChromeDriver { get; private set; }
+        private WebDriverWait Wait { get; set; }
+        private ChromeDriver ChromeDriver { get; set; }
 
         public async Task Intercept(EventHandler<Network.RequestInterceptedEventArgs> interceptor)
         {
+            HandleShortenerUrl();
+
             var session = ChromeDriver.GetDevToolsSession();
             var domains = session.GetVersionSpecificDomains<DevToolsSessionDomains>();
 
@@ -30,10 +38,36 @@ namespace FacebookVideosDownloader.Core.Entities
 
             await domains.Network.Enable(new Network.EnableCommandSettings());
             await domains.Network.SetRequestInterception(requestInterceptionCommandSettings);
+
             domains.Network.RequestIntercepted += interceptor;
 
-            if (ChromeDriver.Url != Url)
-                ChromeDriver.Navigate().GoToUrl(Url);
+            ChromeDriver.Navigate().GoToUrl(Url);
+        }
+
+        public IWebElement FindElement(By by)
+        {
+            return Wait.Until(d => d.FindElement(by));
+        }
+
+        public List<IWebElement> FindElements(By by)
+        {
+            return Wait.Until(d => d.FindElements(by))
+                .ToList();
+        }
+
+        private void HandleShortenerUrl()
+        {
+            ChromeDriver.Navigate().GoToUrl(Url);
+
+            if (Url != ChromeDriver.Url)
+            {
+                Url = ChromeDriver.Url;
+                Finish();
+
+                ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome, false);
+                Wait = new WebDriverWait(ChromeDriver, TimeSpan.FromSeconds(15));
+                ChromeDriver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(15);
+            }
         }
 
         public void Finish()

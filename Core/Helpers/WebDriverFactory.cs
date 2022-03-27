@@ -27,6 +27,10 @@ namespace FacebookVideosDownloader.Core.Helpers
                 case Browser.Chrome:
                     {
                         var options = new ChromeOptions();
+                        //options.AddArgument("disable-blink-features=AutomationControlled");
+                        //options.AddArgument("--no-sandbox");
+                        //options.AddAdditionalOption(CapabilityType.AcceptInsecureCertificates, true);
+                        //options.AddAdditionalOption(CapabilityType.AcceptSslCertificates, true);
 
                         if (headless)
                             options.AddArgument("--headless");

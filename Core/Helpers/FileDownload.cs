@@ -7,7 +7,7 @@ namespace FacebookVideosDownloader.Core.Helpers
 {
     public static class FileDownload
     {
-        public static void MergeAudioAndVideo(string firstVideoPartFileName, string secondVideoPartFileName, string outputDirectory)
+        public static void MergeAudioAndVideoAndSave(string firstVideoPartFileName, string secondVideoPartFileName, string outputDirectory)
         {
             var fileName = $"video_{Guid.NewGuid()}.mp4";
 
@@ -25,12 +25,12 @@ namespace FacebookVideosDownloader.Core.Helpers
             File.Delete(Path.Combine(outputDirectory, secondVideoPartFileName));
         }
 
-        public static string DownloadFile(string url, string outputDirectory)
+        public static string DownloadFileAndSave(string url, string outputDirectory)
         {
             var client = new RestClient();
             var request = new RestRequest(url, Method.GET);
 
-            var fileName = $"video_part_{Guid.NewGuid()}.mp4";
+            var fileName = $"video_{Guid.NewGuid()}.mp4";
             var bytes = client.DownloadData(request);
 
             File.WriteAllBytes(Path.Combine(outputDirectory, fileName), bytes);

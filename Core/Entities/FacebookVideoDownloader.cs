@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using FacebookVideosDownloader.Core.Helpers;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using System;
+using System.Threading;
 
 namespace FacebookVideosDownloader.Core.Entities
 {
@@ -12,15 +15,17 @@ namespace FacebookVideosDownloader.Core.Entities
     {
         public async Task Download(string facebookPostUrl, string outputDirectory)
         {
-            var (firstVideoPartUrl, secondVideoPartUrl) = await ObtainVideoPartUrls(facebookPostUrl);
+            var videoPartsUrls = await ObtainVideoPartUrls(facebookPostUrl);
+            var firstVideoPartFileName = FileDownload.DownloadFileAndSave(videoPartsUrls.ElementAt(0), outputDirectory);
 
-            var firstVideoPartFileName = FileDownload.DownloadFile(firstVideoPartUrl, outputDirectory);
-            var secondVideoPartFileName = FileDownload.DownloadFile(secondVideoPartUrl, outputDirectory);
-
-            FileDownload.MergeAudioAndVideo(firstVideoPartFileName, secondVideoPartFileName, outputDirectory);
+            if (videoPartsUrls.Count == 2)
+            {
+                var secondVideoPartFileName = FileDownload.DownloadFileAndSave(videoPartsUrls.ElementAt(1), outputDirectory);
+                FileDownload.MergeAudioAndVideoAndSave(firstVideoPartFileName, secondVideoPartFileName, outputDirectory);
+            }
         }
 
-        private async Task<(string, string)> ObtainVideoPartUrls(string facebookPostUrl)
+        private async Task<List<string>> ObtainVideoPartUrls(string facebookPostUrl)
         {
             var videoFilesUrls = new List<string>();
 
@@ -29,37 +34,40 @@ namespace FacebookVideosDownloader.Core.Entities
             chromeNetworkInterceptor.InterceptionStage = Network.InterceptionStage.HeadersReceived;
             chromeNetworkInterceptor.ResourceType = Network.ResourceType.XHR;
 
-            var seleniumNavigation = new SeleniumNavigation(chromeNetworkInterceptor.ChromeDriver);
-            seleniumNavigation.Navigate(facebookPostUrl);
-
-            var videoContainsAudio = VideoContainsAudio(seleniumNavigation);
+            bool? videoContainsAudio = null;
+            var waitHandle = new AutoResetEvent(false);
 
             await chromeNetworkInterceptor.Intercept((sender, e) =>
             {
+                videoContainsAudio = !videoContainsAudio.HasValue ? VideoContainsAudio(chromeNetworkInterceptor) : videoContainsAudio.Value;
                 var url = Regex.Replace(e.Request.Url, @"bytestart=(\d+)&?|byteend=(\d+)&?", string.Empty);
 
-                if (videoFilesUrls.Count == 2)
+                if (videoContainsAudio.Value && videoFilesUrls.Count == 2 || !videoContainsAudio.Value && videoFilesUrls.Count == 1)
+                {
+                    waitHandle.Set();
                     return;
+                }
 
                 if (url.StartsWith("https://video") && !videoFilesUrls.Contains(url))
                     videoFilesUrls.Add(url);
             });
 
-            while (videoFilesUrls.Count != 2) { }
+            waitHandle.WaitOne();
             chromeNetworkInterceptor.Finish();
 
-            return (videoFilesUrls.ElementAt(0), videoFilesUrls.ElementAt(1));
+            return videoFilesUrls;
         }
 
-        public bool VideoContainsAudio(SeleniumNavigation seleniumNavigation)
+        public bool VideoContainsAudio(ChromeNetworkInterceptor chromeNetworkInterceptor)
         {
-            var container = seleniumNavigation.GetElement(By.CssSelector("div.oajrlxb2.rq0escxv.p7hjln8o.i1ao9s8h.esuyzwwr.f1sip0of.n00je7tq.arfg74bv.qs9ysxi8.k77z8yql.l9j0dhe7.abiwlrkh.p8dawk7l.g5ia77u1.gcieejh5.bn081pho.humdl8nn.izx4hr6d.nhd2j8a9.q9uorilb.jnigpg78.qjjbsfad.fv0vnmcu.w0hvl6rk.ggphbty4.byekypgc.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.i2p6rm4e.lzcic4wl"));
-            var songIconElement = container.FindElement(By.CssSelector("i.hu5pjgll.eb18blue"));
+            var container = chromeNetworkInterceptor.FindElement(By.CssSelector("div.l9j0dhe7.pcp91wgn.iuny7tx3.p8fzw8mz.discj3wi.o7xrwllt.q9uorilb.nhd2j8a9"));
+            var songIcon = container.FindElement(By.XPath(".//span/span/span/div/i"));
+            var backgroundPosition = songIcon.GetCssValue("background-position");
 
-            var x = songIconElement.GetCssValue("background-position");
-            var notMuttedIcon = songIconElement.GetCssValue("background-position") != "-42px -135px";
+            //properties that set the blocked audio icon in multi-icons image
+            var notBlockedSongIcon = backgroundPosition != "-25px -264px";
 
-            return notMuttedIcon;
+            return notBlockedSongIcon;
         }
     }
 }
