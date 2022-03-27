@@ -15,10 +15,10 @@ namespace FacebookVideosDownloader.Core.Entities
         public SeleniumScraperEngine(Browser browser, TimeSpan timeSpan, bool headless = true)
         {
             WebDriver = WebDriverFactory.CreateWebDriver(browser, headless);
-            Wait = new WebDriverWait(WebDriver, timeSpan);
+            Wait = new CustomWebDriverWait(WebDriver, timeSpan);
 
             WebDriver.Manage().Window.Maximize();
-            Wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            Wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(NotFoundException));
         }
 
         public SeleniumScraperEngine(Browser browser, bool headless = true) : this(browser, TimeSpan.FromSeconds(30), headless)
@@ -26,7 +26,7 @@ namespace FacebookVideosDownloader.Core.Entities
 
         }
 
-        private WebDriverWait Wait { get; set; }
+        private CustomWebDriverWait Wait { get; set; }
         public IWebDriver WebDriver { get; set; }
 
         public void Navigate(string url)
