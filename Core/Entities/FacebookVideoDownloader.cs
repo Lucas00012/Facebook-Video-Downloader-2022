@@ -37,13 +37,12 @@ namespace FacebookVideosDownloader.Core.Entities
 
         private async Task<List<string>> ObtainVideoPartUrls(string facebookPostUrl)
         {
-            Interceptor.Url = facebookPostUrl;
-
             var videoContainsAudio = VideoContainsAudio(facebookPostUrl);
 
             var videoFilesUrls = new List<string>();
             var waitHandle = new AutoResetEvent(false);
 
+            Interceptor.Url = facebookPostUrl;
             await Interceptor.Intercept((sender, e) =>
             {
                 var url = Regex.Replace(e.Request.Url, @"bytestart=(\d+)&?|byteend=(\d+)&?", string.Empty);
