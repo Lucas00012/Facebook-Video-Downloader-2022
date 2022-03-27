@@ -16,6 +16,9 @@ namespace FacebookVideosDownloader.Core.Entities
         {
             WebDriver = WebDriverFactory.CreateWebDriver(browser, headless);
             Wait = new WebDriverWait(WebDriver, timeSpan);
+
+            WebDriver.Manage().Window.Maximize();
+            Wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
         }
 
         public SeleniumScraperEngine(Browser browser, bool headless = true) : this(browser, TimeSpan.FromSeconds(30), headless)
