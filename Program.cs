@@ -34,19 +34,25 @@ namespace FacebookVideosDownloader
             Console.Write("Please insert the output directory that you want: ");
             var outputDirectory = Console.ReadLine();
 
+            Console.Clear();
+            var facebookVideoDownloader = new FacebookVideoDownloader();
+            var message = string.Empty;
+
             try
             {
-                Console.Clear();
-
-                var facebookVideoDownloader = new FacebookVideoDownloader();
                 await facebookVideoDownloader.Download(facebookPostUrl, outputDirectory);
+                message = "DOWNLOAD COMPLETED!";
+            }
+            catch(Exception)
+            {
+                message = "Error while download. Try again later";
+            }
+            finally
+            {
+                facebookVideoDownloader.Dispose();
 
                 Console.Clear();
-                Console.WriteLine("DOWNLOAD COMPLETED!");
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(message);
             }
         }
     }

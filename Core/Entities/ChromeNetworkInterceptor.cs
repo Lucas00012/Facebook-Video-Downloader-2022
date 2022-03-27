@@ -1,91 +1,61 @@
 ﻿using FacebookVideosDownloader.Core.Enums;
 using FacebookVideosDownloader.Core.Helpers;
-using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DevToolsSessionDomains = OpenQA.Selenium.DevTools.V96.DevToolsSessionDomains;
 using Network = OpenQA.Selenium.DevTools.V96.Network;
+using Fetch = OpenQA.Selenium.DevTools.V96.Fetch;
 
 namespace FacebookVideosDownloader.Core.Entities
 {
-    public class ChromeNetworkInterceptor
+    public class ChromeNetworkInterceptor : IDisposable
     {
         public ChromeNetworkInterceptor()
         {
             ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome);
-            Wait = new WebDriverWait(ChromeDriver, TimeSpan.FromSeconds(15));
         }
 
         public string Url { get; set; }
-        public Network.InterceptionStage InterceptionStage { get; set; }
+        public Fetch.RequestStage RequestStage { get; set; }
         public Network.ResourceType ResourceType { get; set; }
 
-        private WebDriverWait Wait { get; set; }
         private ChromeDriver ChromeDriver { get; set; }
 
-        public async Task Intercept(EventHandler<Network.RequestInterceptedEventArgs> interceptor)
+        public async Task Intercept(EventHandler<Fetch.RequestPausedEventArgs> interceptor)
         {
-            HandleShortenerUrl();
-
             var session = ChromeDriver.GetDevToolsSession();
-            var domains = session.GetVersionSpecificDomains<DevToolsSessionDomains>();
+            var fetch = session.GetVersionSpecificDomains<DevToolsSessionDomains>().Fetch;
 
-            var requestInterceptionCommandSettings = GetRequestInterceptionSettings();
+            var enableCommandSettings = GetEnableCommandSettings();
 
-            await domains.Network.Enable(new Network.EnableCommandSettings());
-            await domains.Network.SetRequestInterception(requestInterceptionCommandSettings);
-
-            domains.Network.RequestIntercepted += interceptor;
+            await fetch.Enable(enableCommandSettings);
+            fetch.RequestPaused += interceptor;
 
             ChromeDriver.Navigate().GoToUrl(Url);
         }
 
-        public IWebElement FindElement(By by)
-        {
-            return Wait.Until(d => d.FindElement(by));
-        }
-
-        public List<IWebElement> FindElements(By by)
-        {
-            return Wait.Until(d => d.FindElements(by))
-                .ToList();
-        }
-
-        private void HandleShortenerUrl()
-        {
-            ChromeDriver.Navigate().GoToUrl(Url);
-
-            if (Url != ChromeDriver.Url)
-            {
-                Url = ChromeDriver.Url;
-                Finish();
-
-                ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome, false);
-                Wait = new WebDriverWait(ChromeDriver, TimeSpan.FromSeconds(15));
-                ChromeDriver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(15);
-            }
-        }
-
-        public void Finish()
+        public void Dispose()
         {
             ChromeDriver.Close();
             ChromeDriver.Quit();
         }
 
-        private Network.SetRequestInterceptionCommandSettings GetRequestInterceptionSettings()
+        private Fetch.EnableCommandSettings GetEnableCommandSettings()
         {
-            var requestPattern = new Network.RequestPattern();
-            requestPattern.InterceptionStage = InterceptionStage;
-            requestPattern.ResourceType = ResourceType;
+            var enableCommandSettings = new Fetch.EnableCommandSettings();
 
-            var setRequestInterceptionCommandSettings = new Network.SetRequestInterceptionCommandSettings();
-            setRequestInterceptionCommandSettings.Patterns = new Network.RequestPattern[] { requestPattern };
+            var patterns = new Fetch.RequestPattern[]
+            {
+                new Fetch.RequestPattern
+                {
+                    RequestStage = RequestStage,
+                    ResourceType = ResourceType,
+                }
+            };
 
-            return setRequestInterceptionCommandSettings;
+            enableCommandSettings.Patterns = patterns;
+            return enableCommandSettings;
         }
     }
 }

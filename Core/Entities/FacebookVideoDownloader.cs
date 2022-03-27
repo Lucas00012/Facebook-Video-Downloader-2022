@@ -1,48 +1,54 @@
 ﻿using System.Collections.Generic;
-using Network = OpenQA.Selenium.DevTools.V96.Network;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using FacebookVideosDownloader.Core.Helpers;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using System;
 using System.Threading;
+using Network = OpenQA.Selenium.DevTools.V96.Network;
+using Fetch = OpenQA.Selenium.DevTools.V96.Fetch;
+using FacebookVideosDownloader.Core.Enums;
+using System;
 
 namespace FacebookVideosDownloader.Core.Entities
 {
-    public class FacebookVideoDownloader
+    public class FacebookVideoDownloader : IDisposable
     {
+        public FacebookVideoDownloader()
+        {
+            Scraper = new SeleniumScraperEngine(Browser.Chrome);
+            Interceptor = new ChromeNetworkInterceptor { RequestStage = Fetch.RequestStage.Response, ResourceType = Network.ResourceType.XHR };
+        }
+
+        private SeleniumScraperEngine Scraper { get; set; }
+        private ChromeNetworkInterceptor Interceptor { get; set; }
+
         public async Task Download(string facebookPostUrl, string outputDirectory)
         {
             var videoPartsUrls = await ObtainVideoPartUrls(facebookPostUrl);
             var firstVideoPartFileName = FileDownload.DownloadFileAndSave(videoPartsUrls.ElementAt(0), outputDirectory);
 
-            if (videoPartsUrls.Count == 2)
-            {
-                var secondVideoPartFileName = FileDownload.DownloadFileAndSave(videoPartsUrls.ElementAt(1), outputDirectory);
-                FileDownload.MergeAudioAndVideoAndSave(firstVideoPartFileName, secondVideoPartFileName, outputDirectory);
-            }
+            if (videoPartsUrls.Count == 1)
+                return;
+
+            var secondVideoPartFileName = FileDownload.DownloadFileAndSave(videoPartsUrls.ElementAt(1), outputDirectory);
+            FileDownload.MergeAudioAndVideoAndSave(firstVideoPartFileName, secondVideoPartFileName, outputDirectory);
         }
 
         private async Task<List<string>> ObtainVideoPartUrls(string facebookPostUrl)
         {
+            Interceptor.Url = facebookPostUrl;
+
+            var videoContainsAudio = VideoContainsAudio(facebookPostUrl);
+
             var videoFilesUrls = new List<string>();
-
-            var chromeNetworkInterceptor = new ChromeNetworkInterceptor();
-            chromeNetworkInterceptor.Url = facebookPostUrl;
-            chromeNetworkInterceptor.InterceptionStage = Network.InterceptionStage.HeadersReceived;
-            chromeNetworkInterceptor.ResourceType = Network.ResourceType.XHR;
-
-            bool? videoContainsAudio = null;
             var waitHandle = new AutoResetEvent(false);
 
-            await chromeNetworkInterceptor.Intercept((sender, e) =>
+            await Interceptor.Intercept((sender, e) =>
             {
-                videoContainsAudio = !videoContainsAudio.HasValue ? VideoContainsAudio(chromeNetworkInterceptor) : videoContainsAudio.Value;
                 var url = Regex.Replace(e.Request.Url, @"bytestart=(\d+)&?|byteend=(\d+)&?", string.Empty);
 
-                if (videoContainsAudio.Value && videoFilesUrls.Count == 2 || !videoContainsAudio.Value && videoFilesUrls.Count == 1)
+                if (videoContainsAudio && videoFilesUrls.Count == 2 || !videoContainsAudio && videoFilesUrls.Count == 1)
                 {
                     waitHandle.Set();
                     return;
@@ -53,21 +59,27 @@ namespace FacebookVideosDownloader.Core.Entities
             });
 
             waitHandle.WaitOne();
-            chromeNetworkInterceptor.Finish();
 
             return videoFilesUrls;
         }
 
-        public bool VideoContainsAudio(ChromeNetworkInterceptor chromeNetworkInterceptor)
+        public bool VideoContainsAudio(string facebookPostUrl)
         {
-            var container = chromeNetworkInterceptor.FindElement(By.CssSelector("div.l9j0dhe7.pcp91wgn.iuny7tx3.p8fzw8mz.discj3wi.o7xrwllt.q9uorilb.nhd2j8a9"));
+            Scraper.Navigate(facebookPostUrl);
+
+            var container = Scraper.GetElementByCssSelector("div.l9j0dhe7.pcp91wgn.iuny7tx3.p8fzw8mz.discj3wi.o7xrwllt.q9uorilb.nhd2j8a9");
             var songIcon = container.FindElement(By.XPath(".//span/span/span/div/i"));
-            var backgroundPosition = songIcon.GetCssValue("background-position");
 
-            //properties that set the blocked audio icon in multi-icons image
-            var notBlockedSongIcon = backgroundPosition != "-25px -264px";
+            var songIconPosition = songIcon.GetCssValue("background-position");
+            var songIconNotBlocked = songIconPosition != "-25px -264px";
 
-            return notBlockedSongIcon;
+            return songIconNotBlocked;
+        }
+
+        public void Dispose()
+        {
+            Interceptor.Dispose();
+            Scraper.Dispose();
         }
     }
 }
