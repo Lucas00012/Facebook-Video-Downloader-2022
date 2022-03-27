@@ -63,7 +63,7 @@ namespace FacebookVideosDownloader.Core.Entities
             return videoFilesUrls;
         }
 
-        public bool VideoContainsAudio(string facebookPostUrl)
+        private bool VideoContainsAudio(string facebookPostUrl)
         {
             Scraper.Navigate(facebookPostUrl);
 
