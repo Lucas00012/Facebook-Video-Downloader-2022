@@ -5,10 +5,11 @@ using System;
 using System.Threading.Tasks;
 using DevToolsSessionDomains = OpenQA.Selenium.DevTools.V96.DevToolsSessionDomains;
 using Network = OpenQA.Selenium.DevTools.V96.Network;
+using Fetch = OpenQA.Selenium.DevTools.V96.Fetch;
 
 namespace FacebookVideosDownloader.Core.Entities
 {
-    public class ChromeNetworkInterceptor
+    public class ChromeNetworkInterceptor : IDisposable
     {
         public ChromeNetworkInterceptor()
         {
@@ -16,41 +17,45 @@ namespace FacebookVideosDownloader.Core.Entities
         }
 
         public string Url { get; set; }
-        public Network.InterceptionStage InterceptionStage { get; set; }
+        public Fetch.RequestStage RequestStage { get; set; }
         public Network.ResourceType ResourceType { get; set; }
 
         private ChromeDriver ChromeDriver { get; set; }
 
-        public async Task Intercept(EventHandler<Network.RequestInterceptedEventArgs> interceptor)
+        public async Task Intercept(EventHandler<Fetch.RequestPausedEventArgs> interceptor)
         {
             var session = ChromeDriver.GetDevToolsSession();
-            var domains = session.GetVersionSpecificDomains<DevToolsSessionDomains>();
+            var fetch = session.GetVersionSpecificDomains<DevToolsSessionDomains>().Fetch;
 
-            var requestInterceptionCommandSettings = GetRequestInterceptionSettings();
+            var enableCommandSettings = GetEnableCommandSettings();
 
-            await domains.Network.Enable(new Network.EnableCommandSettings());
-            await domains.Network.SetRequestInterception(requestInterceptionCommandSettings);
-            domains.Network.RequestIntercepted += interceptor;
+            await fetch.Enable(enableCommandSettings);
+            fetch.RequestPaused += interceptor;
 
             ChromeDriver.Navigate().GoToUrl(Url);
         }
 
-        public void Finish()
+        public void Dispose()
         {
             ChromeDriver.Close();
             ChromeDriver.Quit();
         }
 
-        private Network.SetRequestInterceptionCommandSettings GetRequestInterceptionSettings()
+        private Fetch.EnableCommandSettings GetEnableCommandSettings()
         {
-            var requestPattern = new Network.RequestPattern();
-            requestPattern.InterceptionStage = InterceptionStage;
-            requestPattern.ResourceType = ResourceType;
+            var enableCommandSettings = new Fetch.EnableCommandSettings();
 
-            var setRequestInterceptionCommandSettings = new Network.SetRequestInterceptionCommandSettings();
-            setRequestInterceptionCommandSettings.Patterns = new Network.RequestPattern[] { requestPattern };
+            var patterns = new Fetch.RequestPattern[]
+            {
+                new Fetch.RequestPattern
+                {
+                    RequestStage = RequestStage,
+                    ResourceType = ResourceType,
+                }
+            };
 
-            return setRequestInterceptionCommandSettings;
+            enableCommandSettings.Patterns = patterns;
+            return enableCommandSettings;
         }
     }
 }
