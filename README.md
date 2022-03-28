@@ -1,5 +1,8 @@
 # Facebook-Video-Downloader
-A simple console application (C#) to download facebook videos
+A simple console application (C#) to download facebook videos.
+This app uses selenium because its needs to intercept network activity to get the video url.
+If the video has audio, we need to get a video and audio url separately from the network.
+The app was modeled to keep up with current facebook changes.
 
 ## Dependencies
 - FFmpeg
