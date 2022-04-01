@@ -9,7 +9,7 @@ The app was modeled to keep up with current facebook changes.
 - Chromedriver
 
 ## How to run
-You need to install or update the Google Chrome navigator.
+You need to install or update the Google Chrome navigator.  
 Furthermore, all dependencies are already inside the application, so just press the F5 button and see the magic.
 
 ## Example
