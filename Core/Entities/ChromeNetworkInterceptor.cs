@@ -3,9 +3,9 @@ using FacebookVideosDownloader.Core.Helpers;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.Threading.Tasks;
-using DevToolsSessionDomains = OpenQA.Selenium.DevTools.V96.DevToolsSessionDomains;
-using Network = OpenQA.Selenium.DevTools.V96.Network;
-using Fetch = OpenQA.Selenium.DevTools.V96.Fetch;
+using DevToolsSessionDomains = OpenQA.Selenium.DevTools.V101.DevToolsSessionDomains;
+using Network = OpenQA.Selenium.DevTools.V101.Network;
+using Fetch = OpenQA.Selenium.DevTools.V101.Fetch;
 
 namespace FacebookVideosDownloader.Core.Entities
 {

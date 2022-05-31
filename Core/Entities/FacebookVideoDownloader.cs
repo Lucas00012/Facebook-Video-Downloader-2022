@@ -5,8 +5,8 @@ using System.Text.RegularExpressions;
 using FacebookVideosDownloader.Core.Helpers;
 using OpenQA.Selenium;
 using System.Threading;
-using Network = OpenQA.Selenium.DevTools.V96.Network;
-using Fetch = OpenQA.Selenium.DevTools.V96.Fetch;
+using Network = OpenQA.Selenium.DevTools.V101.Network;
+using Fetch = OpenQA.Selenium.DevTools.V101.Fetch;
 using FacebookVideosDownloader.Core.Enums;
 using System;
 

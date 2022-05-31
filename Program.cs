@@ -43,7 +43,7 @@ namespace FacebookVideosDownloader
                 await facebookVideoDownloader.Download(facebookPostUrl, outputDirectory);
                 message = "DOWNLOAD COMPLETED!";
             }
-            catch(Exception)
+            catch(Exception e)
             {
                 message = "Error while download. Try again later";
             }
