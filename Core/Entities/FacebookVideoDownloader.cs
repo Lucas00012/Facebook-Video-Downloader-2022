@@ -5,8 +5,8 @@ using System.Text.RegularExpressions;
 using FacebookVideosDownloader.Core.Helpers;
 using OpenQA.Selenium;
 using System.Threading;
-using Network = OpenQA.Selenium.DevTools.V101.Network;
-using Fetch = OpenQA.Selenium.DevTools.V101.Fetch;
+using Network = OpenQA.Selenium.DevTools.V103.Network;
+using Fetch = OpenQA.Selenium.DevTools.V103.Fetch;
 using FacebookVideosDownloader.Core.Enums;
 using System;
 
@@ -14,14 +14,14 @@ namespace FacebookVideosDownloader.Core.Entities
 {
     public class FacebookVideoDownloader : IDisposable
     {
+        private SeleniumScraperEngine Scraper { get; set; }
+        private ChromeNetworkInterceptor Interceptor { get; set; }
+
         public FacebookVideoDownloader()
         {
             Scraper = new SeleniumScraperEngine(Browser.Chrome);
             Interceptor = new ChromeNetworkInterceptor { RequestStage = Fetch.RequestStage.Response, ResourceType = Network.ResourceType.XHR };
         }
-
-        private SeleniumScraperEngine Scraper { get; set; }
-        private ChromeNetworkInterceptor Interceptor { get; set; }
 
         public async Task Download(string facebookPostUrl, string outputDirectory)
         {

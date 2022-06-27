@@ -3,24 +3,24 @@ using FacebookVideosDownloader.Core.Helpers;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.Threading.Tasks;
-using DevToolsSessionDomains = OpenQA.Selenium.DevTools.V101.DevToolsSessionDomains;
-using Network = OpenQA.Selenium.DevTools.V101.Network;
-using Fetch = OpenQA.Selenium.DevTools.V101.Fetch;
+using DevToolsSessionDomains = OpenQA.Selenium.DevTools.V103.DevToolsSessionDomains;
+using Network = OpenQA.Selenium.DevTools.V103.Network;
+using Fetch = OpenQA.Selenium.DevTools.V103.Fetch;
 
 namespace FacebookVideosDownloader.Core.Entities
 {
     public class ChromeNetworkInterceptor : IDisposable
     {
-        public ChromeNetworkInterceptor()
-        {
-            ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome);
-        }
-
         public string Url { get; set; }
         public Fetch.RequestStage RequestStage { get; set; }
         public Network.ResourceType ResourceType { get; set; }
 
         private ChromeDriver ChromeDriver { get; set; }
+
+        public ChromeNetworkInterceptor()
+        {
+            ChromeDriver = (ChromeDriver)WebDriverFactory.CreateWebDriver(Browser.Chrome);
+        }
 
         public async Task Intercept(EventHandler<Fetch.RequestPausedEventArgs> interceptor)
         {

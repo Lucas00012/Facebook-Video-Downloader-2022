@@ -12,6 +12,9 @@ namespace FacebookVideosDownloader.Core.Entities
 {
     public class SeleniumScraperEngine : IDisposable
     {
+        private CustomWebDriverWait Wait { get; set; }
+        public IWebDriver WebDriver { get; set; }
+
         public SeleniumScraperEngine(Browser browser, TimeSpan timeSpan, bool headless = true)
         {
             WebDriver = WebDriverFactory.CreateWebDriver(browser, headless);
@@ -25,9 +28,6 @@ namespace FacebookVideosDownloader.Core.Entities
         {
 
         }
-
-        private CustomWebDriverWait Wait { get; set; }
-        public IWebDriver WebDriver { get; set; }
 
         public void Navigate(string url)
         {
