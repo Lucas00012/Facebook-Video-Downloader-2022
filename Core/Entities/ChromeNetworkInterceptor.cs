@@ -35,12 +35,6 @@ namespace FacebookVideosDownloader.Core.Entities
             ChromeDriver.Navigate().GoToUrl(Url);
         }
 
-        public void Dispose()
-        {
-            ChromeDriver.Close();
-            ChromeDriver.Quit();
-        }
-
         private Fetch.EnableCommandSettings GetEnableCommandSettings()
         {
             var enableCommandSettings = new Fetch.EnableCommandSettings();
@@ -56,6 +50,16 @@ namespace FacebookVideosDownloader.Core.Entities
 
             enableCommandSettings.Patterns = patterns;
             return enableCommandSettings;
+        }
+
+        public void Close()
+        {
+            ChromeDriver.Close();
+        }
+
+        public void Dispose()
+        {
+            ChromeDriver.Quit();
         }
     }
 }

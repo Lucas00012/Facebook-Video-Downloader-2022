@@ -13,7 +13,7 @@ namespace FacebookVideosDownloader.Core.Entities
     public class SeleniumScraperEngine : IDisposable
     {
         private CustomWebDriverWait Wait { get; set; }
-        public IWebDriver WebDriver { get; set; }
+        private IWebDriver WebDriver { get; set; }
 
         public SeleniumScraperEngine(Browser browser, TimeSpan timeSpan, bool headless = true)
         {
@@ -131,9 +131,13 @@ namespace FacebookVideosDownloader.Core.Entities
             }
         }
 
-        public void Dispose()
+        public void Close()
         {
             WebDriver.Close();
+        }
+
+        public void Dispose()
+        {
             WebDriver.Quit();
         }
     }

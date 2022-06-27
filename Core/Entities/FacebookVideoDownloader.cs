@@ -59,6 +59,9 @@ namespace FacebookVideosDownloader.Core.Entities
 
             waitHandle.WaitOne();
 
+            Interceptor.Close();
+            Scraper.Close();
+
             return videoFilesUrls;
         }
 
@@ -70,7 +73,7 @@ namespace FacebookVideosDownloader.Core.Entities
             var songIcon = container.FindElement(By.XPath(".//span/span/span/div/i"));
 
             var songIconPosition = songIcon.GetCssValue("background-position");
-            var songIconNotBlocked = songIconPosition != "-25px -264px";
+            var songIconNotBlocked = songIconPosition != "0px -111px";
 
             return songIconNotBlocked;
         }
