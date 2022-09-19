@@ -9,7 +9,7 @@ The app was modeled to keep up with current facebook changes.
 - Chromedriver
 
 ## How to run
-You need to install the google chrome navigator and override the .exe file of chromedriver which corresponds with the installed browser
+You need to install the google chrome navigator and override the .exe file of chromedriver which corresponds with the installed browser version.
 
 ## Example
 ![image](https://user-images.githubusercontent.com/51132386/160184856-2694c83f-f579-4055-b031-026fcfd5fad1.png)
